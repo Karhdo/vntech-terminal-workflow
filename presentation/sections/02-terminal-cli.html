@@ -1,0 +1,227 @@
+<!-- ============ 02 TERMINAL & CLI TOOLS ============ -->
+<section class="slide divider" data-section="divider-02">
+  <div class="divider-num">02</div>
+  <div class="section-tag"><i></i>TERMINAL &amp; CLI TOOLS</div>
+  <h2>Terminal &amp; CLI tools</h2>
+  <p class="lead">A terminal you configure in a file, a prompt that tells you where you are, and the small tools that replace cd, ls, find and Ctrl-R.</p>
+  <div class="foot"><span>10 / 35</span><span>terminal &amp; cli tools</span></div>
+</section>
+
+<section class="slide" data-section="terminals">
+  <div class="eyebrow"><svg class="ic"><use href="#ic-terminal"/></svg>Terminal apps</div>
+  <h2>Pick a terminal whose settings are a text file you can commit</h2>
+  <table class="tbl terms">
+    <thead><tr><th>App</th><th>Settings live in</th><th>Tabs / splits</th><th>Worth knowing</th></tr></thead>
+    <tbody>
+      <tr><td class="name">Terminal.app</td><td>Preferences window</td><td>tabs</td><td>Ships with macOS. Fine until you want splits or a theme across machines</td></tr>
+      <tr><td class="name">iTerm2</td><td>Preferences window, saved as a plist</td><td>tabs · splits</td><td>Most features; native tmux mode (<code>tmux -CC</code>). Settings are hard to diff</td></tr>
+      <tr class="pick"><td class="name">WezTerm</td><td><code>~/.wezterm.lua</code></td><td>tabs · splits</td><td>Config is Lua code. GPU-rendered, same file on macOS, Linux, Windows</td></tr>
+      <tr><td class="name">Ghostty</td><td><code>~/.config/ghostty/config</code></td><td>tabs · splits</td><td>Native macOS UI, fast, plain key = value config</td></tr>
+      <tr><td class="name">Alacritty</td><td><code>alacritty.toml</code></td><td>none</td><td>Minimal and fast; expects you to bring tmux</td></tr>
+    </tbody>
+  </table>
+  <div class="foot"><span>11 / 35</span><span>terminal apps</span></div>
+</section>
+
+<section class="slide" data-section="wezterm">
+  <div class="eyebrow"><svg class="ic"><use href="#ic-terminal"/></svg>WezTerm</div>
+  <h2>66 lines of Lua replace a preferences window</h2>
+  <div class="split code-left">
+<pre class="code sm">local config = wezterm.config_builder()
+
+config.font = wezterm.font("Hack Nerd Font Mono")
+config.font_size = 11
+config.color_scheme = "Tokyo Night"
+config.enable_tab_bar = false       <span class="c">-- tmux owns tabs</span>
+config.window_decorations = "RESIZE"
+config.use_ime = true               <span class="c">-- Vietnamese input</span>
+
+<span class="c">-- wallpaper drawn INSIDE the window, dark overlay on top</span>
+config.window_background_opacity = 1.0
+config.background = {
+  { source = { File = wallpaper }, hsb = { brightness = 0.12 } },
+  { source = { Color = "#1a1b26" }, opacity = 0.96 },
+}
+
+config.keys = {
+  <span class="hl">{ key = "Enter", mods = "SHIFT",
+    action = wezterm.action({ SendString = "\x1b\r" }) },</span>
+}</pre>
+    <ul class="points">
+      <li><b>No tab bar.</b> WezTerm only draws text; tmux handles windows and panes.</li>
+      <li><b>Wallpaper, not transparency.</b> A transparent window showed whatever app was behind it, and text got hard to read. The image plus a 96% overlay looks the same over any app.</li>
+      <li data-step="1"><b><kbd>Shift</kbd> <kbd>Enter</kbd></b> sends <code>ESC + CR</code>, which Claude Code reads as "new line" instead of "send".</li>
+      <li data-step="1"><b>Nerd Font</b> carries the icons that starship, eza and tmux print. Without it you see empty boxes.</li>
+    </ul>
+  </div>
+  <div class="foot"><span>12 / 35</span><span>wezterm · .wezterm.lua</span></div>
+</section>
+
+<section class="slide" data-section="starship">
+  <div class="eyebrow"><svg class="ic"><use href="#ic-star"/></svg>Starship</div>
+  <h2>The prompt shows only what the current directory needs</h2>
+  <div class="split">
+    <div class="stack">
+      <div class="term">
+        <div class="term-bar"><i></i><i></i><i></i><span>a plain directory</span></div>
+        <pre class="term-body"><span class="t-dir">~/Downloads</span>
+<span class="t-p">❯</span></pre>
+      </div>
+      <div class="term" data-step="1">
+        <div class="term-bar"><i></i><i></i><i></i><span>a Node project: package.json found</span></div>
+        <pre class="term-body"><span class="t-dir">~/Workplace/Karhdo/karhdo.dev</span> on <span class="t-git">main</span> <span class="t-warn">[!?]</span> via <span class="t-ver">node v20.11.1</span>
+<span class="t-p">❯</span></pre>
+      </div>
+      <div class="term" data-step="2">
+        <div class="term-bar"><i></i><i></i><i></i><span>a Java service: build.gradle.kts found</span></div>
+        <pre class="term-body"><span class="t-dir">loanbud-hq/backend-hub</span> on <span class="t-git">feat/ecr</span> via <span class="t-ver">java v21</span> <span class="t-ver">gradle</span>
+<span class="t-p">❯</span></pre>
+      </div>
+    </div>
+    <ul class="points">
+      <li>One line in <code>.zshrc</code>: <code>eval "$(starship init zsh)"</code>.</li>
+      <li>Config in <code>~/.config/starship.toml</code>, in the dotfiles repo.</li>
+      <li>Each module turns on only when it finds its files: <code>package.json</code> → Node version, <code>.git</code> → branch and status.</li>
+      <li data-step="2">Written in Rust, so it stays fast. The same prompt works in zsh, bash and fish.</li>
+    </ul>
+  </div>
+  <div class="foot"><span>13 / 35</span><span>starship · .config/starship.toml</span></div>
+</section>
+
+
+<section class="slide" data-section="zsh-plugins">
+  <div class="eyebrow"><svg class="ic"><use href="#ic-clock"/></svg>zsh plugins</div>
+  <h2>Two plugins, no framework: grey suggestions from history, and colors that catch typos before Enter</h2>
+  <div class="two">
+    <div class="stack">
+      <div class="k" style="font-family:var(--mono);font-size:14px;font-weight:600;color:var(--accent-strong);letter-spacing:.05em">ZSH-AUTOSUGGESTIONS</div>
+      <div class="term">
+        <div class="term-bar"><i></i><i></i><i></i><span>type "git p"</span></div>
+        <pre class="term-body"><span class="t-p">❯</span> <span class="t-cmd">git</span> p<span class="t-ghost">ush origin feat/terminal-talk</span>
+<span data-step="1"><span class="t-dim"># Shift+Tab accepts it</span>
+<span class="t-p">❯</span> <span class="t-cmd">git</span> push origin feat/terminal-talk<span class="t-cursor"></span></span></pre>
+      </div>
+      <ul class="points tight">
+        <li>The grey text is the latest history entry starting with what you typed.</li>
+        <li data-step="1"><kbd>Shift</kbd><kbd>Tab</kbd> accepts (<code>bindkey '^[[Z' autosuggest-accept</code>), so <kbd>Tab</kbd> stays completion. <kbd>↑</kbd> searches history by prefix.</li>
+      </ul>
+    </div>
+    <div class="stack" data-step="2">
+      <div class="k" style="font-family:var(--mono);font-size:14px;font-weight:600;color:var(--accent-strong);letter-spacing:.05em">ZSH-SYNTAX-HIGHLIGHTING</div>
+      <div class="term">
+        <div class="term-bar"><i></i><i></i><i></i><span>before Enter</span></div>
+        <pre class="term-body"><span class="t-p">❯</span> <span class="t-bad">gti</span> status
+<span class="t-p">❯</span> <span class="t-cmd">git</span> status
+<span class="t-p">❯</span> <span class="t-cmd">cd</span> <span class="t-path">~/Workplace/Spartan</span>
+<span class="t-p">❯</span> <span class="t-cmd">echo</span> <span class="t-str">"unclosed</span></pre>
+      </div>
+      <ul class="points tight">
+        <li><span class="t-bad"><b>Red</b></span>: no such command. <span class="t-path">Underline</span>: the path exists. <span class="t-str"><b>Yellow</b></span> to the end: an open quote.</li>
+        <li>Source it <b>last</b> in <code>.zshrc</code>, after other plugins and key bindings.</li>
+      </ul>
+    </div>
+  </div>
+<pre class="code sm"><span class="c"># install both: git clone into ~/.zsh_custom, then in .zshrc</span>
+source ~/.zsh_custom/zsh-autosuggestions/zsh-autosuggestions.zsh
+source ~/.zsh_custom/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh</pre>
+  <div class="foot"><span>14 / 35</span><span>zsh-autosuggestions · zsh-syntax-highlighting</span></div>
+</section>
+
+
+<section class="slide" data-section="fzf">
+  <div class="eyebrow"><svg class="ic"><use href="#ic-search"/></svg>fzf + fd + bat</div>
+  <h2>fd finds the files, fzf filters them as you type, bat previews the one you're on</h2>
+  <div class="pipe">
+    <div class="card"><div class="k">fd</div><p>Lists files fast. Includes hidden files, skips <code>.git</code>.</p><pre class="code">fd --type f --hidden \
+  --follow --exclude .git</pre></div>
+    <div class="arrow">→</div>
+    <div class="card"><div class="k">fzf</div><p>Fuzzy filter: type <code>tmxcnf</code>, get <code>.tmux.conf</code>.</p><pre class="code">FZF_DEFAULT_COMMAND="$find_files"</pre></div>
+    <div class="arrow">→</div>
+    <div class="card"><div class="k">bat</div><p>Shows the selected file with syntax colors in the preview pane.</p><pre class="code">--preview 'bat --color=always {}'</pre></div>
+  </div>
+  <div class="two" data-step="1">
+    <div class="keys">
+      <div><kbd>Ctrl</kbd> <kbd>T</kbd></div><div>Pick a file and paste its path into the command</div>
+      <div><kbd>Alt</kbd> <kbd>C</kbd></div><div><code>cd</code> into a directory you pick</div>
+      <div><kbd>Ctrl</kbd> <kbd>R</kbd></div><div>Search your whole history, fuzzy</div>
+    </div>
+<pre class="code sm"><span class="c"># checkout any branch, local or remote, with fzf</span>
+gcof() {
+  local branch
+  branch=$(git branch --all | sed 's/^[* ] //' | fzf) || return
+  git checkout "${branch#remotes/origin/}"
+}</pre>
+  </div>
+  <div class="foot"><span>15 / 35</span><span>fzf · fd · bat</span></div>
+</section>
+
+<section class="slide" data-section="zoxide-eza">
+  <div class="eyebrow"><svg class="ic"><use href="#ic-folder"/></svg>zoxide + eza</div>
+  <h2>Jump to a directory by name, and list it with icons</h2>
+  <div class="two">
+    <div class="card lift">
+      <div class="k">zoxide · smarter cd</div>
+      <div class="term">
+        <pre class="term-body"><span class="t-p">❯</span> <span class="t-cmd">z</span> loanbud
+<span class="t-dir">~/Workplace/Spartan/loanbud-hq</span>
+<span class="t-p">❯</span> <span class="t-cmd">z</span> dot
+<span class="t-dir">~/Workplace/Karhdo/dotfiles</span></pre>
+      </div>
+      <p>It remembers every directory you <code>cd</code> into and ranks them by how often and how recently you went there. <code>zi</code> opens the list in fzf.</p>
+<pre class="code">eval "$(zoxide init zsh)"</pre>
+    </div>
+    <div class="card lift">
+      <div class="k">eza · modern ls</div>
+      <div class="term">
+        <pre class="term-body"><span class="t-p">❯</span> <span class="t-cmd">la</span>
+<span class="t-dim">drwxr-xr-x</span>  <span class="t-dir">.config</span>
+<span class="t-dim">.rw-r--r--</span>  Brewfile
+<span class="t-dim">.rw-r--r--</span>  .zshrc</pre>
+      </div>
+      <p>Colors, Nerd Font icons, <code>--git</code> shows each file's git status, <code>--tree</code> replaces <code>tree</code>.</p>
+<pre class="code">alias ls="eza --icons=always"
+alias la="eza -la --icons=always"</pre>
+    </div>
+  </div>
+  <div class="foot"><span>16 / 35</span><span>zoxide · eza</span></div>
+</section>
+
+<section class="slide" data-section="aliases">
+  <div class="eyebrow"><svg class="ic"><use href="#ic-keyboard"/></svg>Aliases</div>
+  <h2>Alias what you type five times a day</h2>
+  <div class="quad">
+    <div class="card lift"><div class="k">shorten</div>
+<pre class="code">alias c="clear"
+alias v="nvim"
+alias lzd="lazydocker"</pre></div>
+    <div class="card lift"><div class="k">jump</div>
+<pre class="code">alias zw="cd ~/Workplace"
+alias zs="cd …/Spartan"
+alias zd="cd …/dotfiles"</pre></div>
+    <div class="card lift"><div class="k">edit config</div>
+<pre class="code">alias cz="… v .zshrc"
+alias cv="… v init.lua"
+alias ca="cd ~/.aws …"
+alias rz="source ~/.zshrc"</pre></div>
+    <div class="card lift"><div class="k">replace</div>
+<pre class="code">alias ls="eza --icons=…"
+alias la="eza -la …"</pre></div>
+  </div>
+  <ul class="points" data-step="1">
+    <li>Need arguments or logic? Write a <b>function</b>, like <code>gcof</code>. An alias is only text substitution.</li>
+  </ul>
+  <div class="foot"><span>17 / 35</span><span>aliases · .zshrc</span></div>
+</section>
+
+<section class="slide" data-section="philosophy">
+  <div class="eyebrow"><svg class="ic"><use href="#ic-shield"/></svg>Dotfiles philosophy</div>
+  <h2>Config is code; credentials are not</h2>
+  <ul class="points">
+    <li><span class="chip hot">1 · in git</span>Every config file is committed. You get a diff, a history and a backup for free.</li>
+    <li><span class="chip hot">2 · no secrets</span><code>~/.gitconfig-karhdo</code>, <code>~/.ssh</code>, <code>.envrc</code> tokens and <code>~/.aws</code> stay outside the repo. <code>.gitignore</code> blocks <code>.config/gh/</code> and <code>.config/github-copilot/</code>.</li>
+    <li data-step="1"><span class="chip hot">3 · comment why</span>"Testcontainers ignores Docker contexts" beats "set DOCKER_HOST".</li>
+    <li data-step="1"><span class="chip hot">4 · one theme</span>Tokyo Night in WezTerm, tmux, bat, fzf, delta, lazygit and Claude Code. A screenshot from any tool looks like the same machine.</li>
+    <li data-step="2"><span class="chip hot">5 · README = setup</span>If a step isn't written down, the next laptop won't get it.</li>
+  </ul>
+  <div class="foot"><span>18 / 35</span><span>dotfiles philosophy</span></div>
+</section>

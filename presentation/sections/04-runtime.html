@@ -1,0 +1,90 @@
+<!-- ============ 04 MACBOOK RUNTIME ============ -->
+<section class="slide divider" data-section="divider-04">
+  <div class="divider-num">04</div>
+  <div class="section-tag"><i></i>MACBOOK RUNTIME</div>
+  <h2>MacBook runtime</h2>
+  <p class="lead">A PATH you can explain, and Docker without Docker Desktop.</p>
+  <div class="foot"><span>23 / 35</span><span>macbook runtime</span></div>
+</section>
+
+
+<section class="slide" data-section="path-order">
+  <div class="eyebrow"><svg class="ic"><use href="#ic-list"/></svg>PATH</div>
+  <h2>Each export puts its directory first, so the last one in .zshrc wins</h2>
+  <div class="split even">
+    <div class="stack">
+      <div class="code-label">.zshrc, top to bottom</div>
+<pre class="code sm">eval "$(brew shellenv)"              <span class="c"># /opt/homebrew/bin</span>
+export PATH="$HOME/.cargo/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="/usr/local/bin:$PATH"
+eval "$(fnm env --use-on-cd …)"     <span class="c"># fnm's node</span>
+export PATH=$JAVA_HOME/bin:$PATH
+export PATH="…/libpq/bin:$PATH"      <span class="c"># last line</span></pre>
+    </div>
+    <div class="stack" data-step="1">
+      <div class="code-label">echo $PATH | tr : '\n'   (lookup order)</div>
+<pre class="code sm"><span class="hl">/opt/homebrew/opt/libpq/bin</span>      <span class="c"># 1st: last export</span>
+…/temurin-21/Contents/Home/bin
+…/fnm_multishells/83139_…/bin
+/usr/local/bin
+…
+/Users/khanhdo/.local/bin
+/Users/khanhdo/.cargo/bin
+/opt/homebrew/bin                 <span class="c"># first export, now last</span></pre>
+    </div>
+  </div>
+  <ul class="points tight" data-step="2">
+    <li>Two directories with the same binary? The one higher in the list runs. <code>which -a node</code> shows every match, in order.</li>
+    <li>To win over Homebrew, a directory has to be exported <b>after</b> <code>brew shellenv</code>.</li>
+    <li>Every tmux pane runs <code>.zshrc</code> again and prepends everything twice. <code>typeset -U path</code> at the top keeps entries unique.</li>
+  </ul>
+  <div class="foot"><span>24 / 35</span><span>PATH order</span></div>
+</section>
+
+
+<section class="slide" data-section="colima">
+  <div class="eyebrow"><svg class="ic"><use href="#ic-box"/></svg>Docker without Docker Desktop</div>
+  <h2>The Docker CLI is free; the engine can run in a small VM called Colima</h2>
+  <div class="split">
+    <div class="chart meter">
+      <svg viewBox="0 0 640 260" role="img" aria-label="macOS host running the docker CLI, which talks over a socket to the Docker engine inside the Colima Linux VM">
+        <defs><marker id="arrow-colima" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto"><path d="M0 0 L11 5.5 L0 11 Z" class="sv-ink"/></marker></defs>
+        <rect x="10" y="10" width="620" height="240" rx="14" class="gl-shell"/>
+        <text x="28" y="38" class="sv-lbl">macOS</text>
+        <rect x="30" y="70" width="190" height="150" rx="12" class="sv-box"/>
+        <text x="125" y="104" text-anchor="middle" class="sv-lbl">docker CLI</text>
+        <text x="125" y="132" text-anchor="middle" class="sv-lbl-sm">compose · buildx</text>
+        <text x="125" y="156" text-anchor="middle" class="sv-lbl-sm">lazydocker (lzd)</text>
+        <text x="125" y="196" text-anchor="middle" class="sv-tick">brew "docker"</text>
+        <path d="M222 145 H368" class="sv-hot-line" marker-end="url(#arrow-colima)"/>
+        <text x="295" y="134" text-anchor="middle" class="sv-hot">docker.sock</text>
+        <text x="295" y="172" text-anchor="middle" class="sv-tick">DOCKER_HOST</text>
+        <rect x="372" y="56" width="240" height="176" rx="12" class="gl-shell-hot"/>
+        <text x="392" y="84" class="sv-hot">Colima VM (Linux)</text>
+        <rect x="392" y="100" width="200" height="56" rx="10" class="sv-box-hot"/>
+        <text x="492" y="134" text-anchor="middle" class="sv-lbl">Docker engine</text>
+        <text x="492" y="186" text-anchor="middle" class="sv-lbl-sm">containers run here</text>
+        <text x="492" y="210" text-anchor="middle" class="sv-tick">vz · Rosetta for amd64</text>
+      </svg>
+    </div>
+<pre class="code sm"><span class="c"># first run</span>
+colima start --cpu 4 --memory 8 \
+  --vm-type vz --vz-rosetta
+<span class="c"># later</span>
+colima start
+colima stop     <span class="c"># gives the RAM back</span>
+colima status
+
+<span class="c"># ~/.docker/config.json</span>
+"credsStore": "osxkeychain"</pre>
+  </div>
+  <ul class="points tight" data-step="1">
+    <li>Same <code>docker</code> and <code>docker compose</code> commands as before. Only the engine moved.</li>
+    <li><b>Testcontainers</b> ignores Docker contexts: set <code>DOCKER_HOST</code> to Colima's socket (and <code>TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock</code>).</li>
+    <li><b>Bind mounts</b> work only from <code>$HOME</code>: Colima doesn't share <code>/tmp</code>, so it mounts as an empty folder.</li>
+  </ul>
+  <div class="foot"><span>25 / 35</span><span>colima</span></div>
+</section>
+
+

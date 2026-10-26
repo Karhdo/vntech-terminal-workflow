@@ -1,0 +1,57 @@
+<!-- ============ 05 AWS CONFIG ============ -->
+<!-- ~/.aws is not in the dotfiles repo. Account IDs are masked as XXXX on purpose. -->
+<section class="slide divider" data-section="divider-05">
+  <div class="divider-num">05</div>
+  <div class="section-tag"><i></i>AWS CONFIG</div>
+  <h2>AWS config</h2>
+  <p class="lead">One SSO login in the browser, then a named profile for each environment. No long-lived access keys in a file.</p>
+  <div class="foot"><span>26 / 35</span><span>aws config</span></div>
+</section>
+
+<section class="slide" data-section="aws-sso">
+  <div class="eyebrow"><svg class="ic"><use href="#ic-cloud"/></svg>SSO profiles</div>
+  <h2>Log in once, then switch accounts by profile name</h2>
+  <div class="split even">
+<pre class="code sm"><span class="c"># ~/.aws/config (not in the dotfiles repo)</span>
+[<span class="hl">sso-session loanbud_sso</span>]
+sso_start_url = https://&lt;org&gt;.awsapps.com/start
+sso_region = us-east-1
+
+[profile loanbud_dev]
+sso_session = loanbud_sso
+sso_account_id = XXXX
+sso_role_name = SpartanPowerUserAccess
+
+[profile loanbud_staging]   <span class="c"># same, other account</span>
+
+[profile loanbud_prod]
+sso_session = loanbud_sso
+sso_role_name = <span class="hl">IAMAuthDatabaseAccess</span>   <span class="c"># …</span></pre>
+    <div class="chart meter">
+      <svg viewBox="0 0 520 380" style="max-height:290px" role="img" aria-label="One SSO session feeding three profiles; prod uses a narrower role">
+        <defs><marker id="arrow-sso" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto"><path d="M0 0 L11 5.5 L0 11 Z" class="sv-ink"/></marker></defs>
+        <rect x="20" y="150" width="170" height="80" rx="12" class="sv-box-hot"/>
+        <text x="105" y="184" text-anchor="middle" class="sv-lbl">loanbud_sso</text>
+        <text x="105" y="210" text-anchor="middle" class="sv-tick">1 browser login</text>
+        <path d="M192 180 C 250 120, 270 70, 300 62" class="sv-hot-line" marker-end="url(#arrow-sso)"/>
+        <path d="M192 190 H300" class="sv-hot-line" marker-end="url(#arrow-sso)"/>
+        <path d="M192 200 C 250 260, 270 310, 300 318" class="sv-hot-line" marker-end="url(#arrow-sso)"/>
+        <rect x="304" y="28" width="200" height="70" rx="10" class="sv-box"/>
+        <text x="320" y="56" class="sv-lbl">loanbud_dev</text>
+        <text x="320" y="82" class="sv-tick">PowerUser</text>
+        <rect x="304" y="155" width="200" height="70" rx="10" class="sv-box"/>
+        <text x="320" y="183" class="sv-lbl">loanbud_staging</text>
+        <text x="320" y="209" class="sv-tick">PowerUser</text>
+        <g data-step="1">
+          <rect x="304" y="282" width="200" height="70" rx="10" class="sv-box-risk"/>
+          <text x="320" y="310" class="sv-lbl">loanbud_prod</text>
+          <text x="320" y="336" class="sv-risk" style="font-size:14px">IAMAuthDatabaseAccess</text>
+        </g>
+      </svg>
+      <figcaption data-step="1">Prod uses a different role from dev and staging, visible right in the config file.</figcaption>
+    </div>
+  </div>
+  <div class="callout" data-step="2"><span class="chip hot">daily</span><span><code>aws sso login --sso-session loanbud_sso</code> once (browser), then <code>--profile loanbud_dev</code> or <code>export AWS_PROFILE=…</code>. The token is cached and expires: no static keys to rotate.</span></div>
+  <div class="foot"><span>27 / 35</span><span>aws sso · ~/.aws/config</span></div>
+</section>
+

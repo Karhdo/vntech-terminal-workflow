@@ -1,0 +1,116 @@
+<!-- ============ 03 MULTIPLE GIT ACCOUNTS ============ -->
+<!-- Emails are shown as <personal> / <work> on purpose: the deck is published. -->
+<section class="slide divider" data-section="divider-03">
+  <div class="divider-num">03</div>
+  <div class="section-tag"><i></i>MULTIPLE GIT ACCOUNTS</div>
+  <h2>Multiple git accounts</h2>
+  <p class="lead">One global identity means work commits with a personal email, pushes with the wrong SSH key, and <code>gh</code> as the wrong user. Fix: let the directory choose.</p>
+  <div class="foot"><span>19 / 35</span><span>multiple git accounts</span></div>
+</section>
+
+
+<section class="slide" data-section="includeif">
+  <div class="eyebrow"><svg class="ic"><use href="#ic-git"/></svg>includeIf</div>
+  <h2>The directory decides who you are: includeIf loads a different identity per folder</h2>
+  <div class="split even">
+    <div class="stack">
+      <div class="code-label">~/.gitconfig (in the dotfiles repo)</div>
+<pre class="code sm">[includeIf "gitdir:~/Workplace/Karhdo/"]
+  path = ~/.gitconfig-karhdo
+[includeIf "gitdir:~/Workplace/Spartan/"]
+  path = ~/.gitconfig-spartan</pre>
+      <div class="code-label">~/.gitconfig-spartan</div>
+<pre class="code sm">[user]
+  name = Spartan - Khanh Do
+  email = &lt;work email&gt;
+  signingkey = ~/.ssh/spartan.pub
+[alias]
+  spartan-check = !echo '✅ Spartan config loaded!'</pre>
+    </div>
+    <div class="stack">
+      <div class="term">
+        <div class="term-bar"><i></i><i></i><i></i><span>same command, two folders</span></div>
+        <pre class="term-body"><span class="t-p">❯</span> <span class="t-cmd">cd</span> ~/Workplace/Karhdo/dotfiles
+<span class="t-p">❯</span> <span class="t-cmd">git</span> config user.name
+Karhdo
+<span data-step="1"><span class="t-p">❯</span> <span class="t-cmd">cd</span> ~/Workplace/Spartan/loanbud-hq
+<span class="t-p">❯</span> <span class="t-cmd">git</span> config user.name
+Spartan - Khanh Do
+<span class="t-p">❯</span> <span class="t-cmd">git</span> spartan-check
+<span class="t-ok">✅ Spartan config loaded!</span></span></pre>
+      </div>
+      <ul class="points tight" data-step="2">
+        <li>The trailing <code>/</code> in <code>gitdir:</code> matches every repo under that folder.</li>
+        <li>The <code>*-check</code> alias exists in only one include file, so it shows which one loaded.</li>
+        <li><code>signingkey</code> comes from the same file: with <code>gpg.format = ssh</code> and <code>commit.gpgsign = true</code>, every commit is signed with that account's SSH key.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>20 / 35</span><span>includeIf · .gitconfig</span></div>
+</section>
+
+<section class="slide" data-section="ssh-hosts">
+  <div class="eyebrow"><svg class="ic"><use href="#ic-key"/></svg>SSH host aliases</div>
+  <h2>Two host aliases for github.com, each tied to one key</h2>
+  <div class="split even">
+    <div class="stack">
+      <div class="code-label">~/.ssh/config (not in the repo)</div>
+<pre class="code"><span class="c"># Karhdo's GitHub</span>
+Host <span class="hl">github</span>
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/karhdo
+  IdentitiesOnly yes
+
+<span class="c"># Spartan's GitHub</span>
+Host <span class="hl">github-spartan</span>
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/spartan
+  IdentitiesOnly yes</pre>
+    </div>
+    <div class="stack">
+      <div class="code-label">the remote URL picks the alias</div>
+<pre class="code sm">git@<span class="hl">github</span>:Karhdo/dotfiles.git
+git@<span class="hl">github-spartan</span>:spartan-trucle/vntech-load-balancer.git</pre>
+      <ul class="points">
+        <li>Both aliases reach the same <code>github.com</code>. Only the key differs.</li>
+        <li><code>IdentitiesOnly yes</code> stops ssh-agent from offering the other key first.</li>
+        <li data-step="1">Clone with the alias: <code>git clone git@github-spartan:org/repo.git</code>. A URL copied from GitHub says <code>github.com</code>, so change that part.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>21 / 35</span><span>ssh · ~/.ssh/config</span></div>
+</section>
+
+
+<section class="slide" data-section="gh-direnv">
+  <div class="eyebrow"><svg class="ic"><use href="#ic-folder"/></svg>gh + direnv</div>
+  <h2>direnv gives the gh CLI a different token in each workspace</h2>
+  <div class="split code-left">
+    <div class="stack">
+<pre class="code"><span class="c"># ~/Workplace/Spartan/.envrc (never committed)</span>
+export GH_TOKEN=github_pat_…
+
+<span class="c"># once per workspace</span>
+direnv allow ~/Workplace/Spartan
+
+<span class="c"># .zshrc</span>
+eval "$(direnv hook zsh)"
+export DIRENV_LOG_FORMAT=""   <span class="c"># no "loading .envrc" noise</span></pre>
+    </div>
+    <ul class="points">
+      <li>Entering the folder exports the variables, and leaving it unsets them.</li>
+      <li><code>gh</code> prefers <code>GH_TOKEN</code> over its saved login, so the folder decides the account.</li>
+      <li data-step="1">Fine-grained token, scopes <code>repo</code>, <code>read:org</code>, <code>gist</code>. Each workspace has its own, so revoking one doesn't touch the other.</li>
+    </ul>
+  </div>
+  <table class="tbl compact" data-step="2">
+    <thead><tr><th>Workspace</th><th>git user</th><th>SSH host</th><th>gh account</th><th>signing key</th></tr></thead>
+    <tbody>
+      <tr><td class="name mono">~/Workplace/Karhdo/</td><td>Karhdo</td><td><code>github</code></td><td>Karhdo</td><td><code>karhdo.pub</code></td></tr>
+      <tr><td class="name mono">~/Workplace/Spartan/</td><td>Spartan - Khanh Do</td><td><code>github-spartan</code></td><td>spartan-khanhdo</td><td><code>spartan.pub</code></td></tr>
+    </tbody>
+  </table>
+  <div class="foot"><span>22 / 35</span><span>gh · direnv · .envrc</span></div>
+</section>

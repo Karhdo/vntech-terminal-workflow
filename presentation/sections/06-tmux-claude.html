@@ -1,0 +1,212 @@
+<!-- ============ 06 TMUX & CLAUDE SESSIONS ============ -->
+<section class="slide divider" data-section="divider-06">
+  <div class="divider-num">06</div>
+  <div class="section-tag"><i></i>TMUX &amp; CLAUDE SESSIONS</div>
+  <h2>tmux &amp; Claude sessions</h2>
+  <p class="lead">tmux first: sessions that outlive the window. Then Claude Code in a popup for each project, which you can hide, pick and resume without losing it.</p>
+  <div class="foot"><span>28 / 35</span><span>tmux &amp; claude sessions</span></div>
+</section>
+
+<section class="slide" data-section="tmux-model">
+  <div class="eyebrow"><svg class="ic"><use href="#ic-panes"/></svg>tmux</div>
+  <h2>tmux keeps your sessions running after the terminal window closes</h2>
+  <div class="split">
+    <div class="chart meter">
+      <svg viewBox="0 0 700 330" role="img" aria-label="tmux server holding sessions, each with windows, each with panes">
+        <rect x="10" y="10" width="680" height="310" rx="14" class="gl-shell"/>
+        <text x="28" y="40" class="sv-lbl">tmux server</text>
+        <text x="672" y="40" text-anchor="end" class="sv-tick">keeps running in the background</text>
+        <rect x="30" y="60" width="400" height="240" rx="12" class="gl-shell-hot"/>
+        <text x="48" y="88" class="sv-hot">session · LoanBud</text>
+        <rect x="48" y="104" width="170" height="180" rx="8" class="sv-box-hot"/>
+        <text x="60" y="126" class="sv-lbl-sm">1 · backend-hub</text>
+        <rect x="58" y="138" width="72" height="136" rx="4" class="sv-box"/>
+        <rect x="136" y="138" width="72" height="64" rx="4" class="sv-box"/>
+        <rect x="136" y="210" width="72" height="64" rx="4" class="sv-box"/>
+        <text x="94" y="210" text-anchor="middle" class="sv-tick">pane</text>
+        <text x="172" y="174" text-anchor="middle" class="sv-tick">pane</text>
+        <text x="172" y="246" text-anchor="middle" class="sv-tick">pane</text>
+        <rect x="236" y="104" width="176" height="180" rx="8" class="sv-box"/>
+        <text x="248" y="126" class="sv-lbl-sm">2 · frontend</text>
+        <rect x="246" y="138" width="156" height="136" rx="4" class="sv-box"/>
+        <text x="324" y="210" text-anchor="middle" class="sv-tick">pane</text>
+        <rect x="450" y="60" width="222" height="240" rx="12" class="gl-shell"/>
+        <text x="468" y="88" class="sv-lbl">session · Karhdo</text>
+        <rect x="468" y="104" width="186" height="180" rx="8" class="sv-box"/>
+        <text x="480" y="126" class="sv-lbl-sm">1 · dotfiles</text>
+        <rect x="478" y="138" width="166" height="136" rx="4" class="sv-box"/>
+        <text x="561" y="210" text-anchor="middle" class="sv-tick">pane</text>
+      </svg>
+    </div>
+    <ul class="points">
+      <li><b>Session</b>: one per project. <b>Window</b> (numbered): like a tab. <b>Pane</b>: a split inside a window.</li>
+      <li>Close WezTerm, or let it crash, and the server keeps every shell and process running.</li>
+      <li data-step="1"><kbd>prefix</kbd> <kbd>d</kbd> detaches. <code>tmux attach -t LoanBud</code> brings it back exactly as it was.</li>
+      <li data-step="1">The Claude popups in this part are tmux sessions too. That is why they survive being closed.</li>
+    </ul>
+  </div>
+  <div class="foot"><span>29 / 35</span><span>tmux · session · window · pane</span></div>
+</section>
+
+<section class="slide" data-section="tmux-config">
+  <div class="eyebrow"><svg class="ic"><use href="#ic-keyboard"/></svg>.tmux.conf</div>
+  <h2>One prefix for everything, and vim keys to move between panes</h2>
+  <div class="split code-left">
+<pre class="code sm"><span class="c"># prefix: Ctrl-t instead of Ctrl-b</span>
+unbind C-b
+set-option -g prefix C-t
+
+<span class="c"># move between panes: h j k l (repeatable)</span>
+bind -r h select-pane -L
+bind -r j select-pane -D
+bind -r k select-pane -U
+bind -r l select-pane -R
+<span class="c"># resize by 5 cells</span>
+bind -r C-h resize-pane -L 5
+
+setw -g mouse on
+set -g history-limit 10000
+set -g renumber-windows on          <span class="c"># 0 2 5 → 0 1 2</span>
+<span class="c"># pass 24-bit color through to WezTerm</span>
+set -as terminal-features ',xterm-256color:RGB'
+bind r source-file ~/.tmux.conf</pre>
+    <div class="keys">
+      <div><kbd>C-t</kbd> <kbd>c</kbd></div><div>New window</div>
+      <div><kbd>C-t</kbd> <kbd>%</kbd> / <kbd>"</kbd></div><div>Split side by side / top and bottom</div>
+      <div><kbd>C-t</kbd> <kbd>h j k l</kbd></div><div>Move to the pane left / down / up / right</div>
+      <div><kbd>C-t</kbd> <kbd>n</kbd> / <kbd>p</kbd></div><div>Next / previous window</div>
+      <div><kbd>C-t</kbd> <kbd>s</kbd></div><div>Switch session from a list</div>
+      <div><kbd>C-t</kbd> <kbd>d</kbd></div><div>Detach: everything keeps running</div>
+      <div><kbd>C-t</kbd> <kbd>r</kbd></div><div>Reload <code>.tmux.conf</code></div>
+    </div>
+  </div>
+  <div class="callout" data-step="1"><span class="chip hot">why C-t</span><span>Ctrl-b is a long stretch on the keyboard and also moves the cursor back in the shell. Pick a prefix you can press with one hand.</span></div>
+  <div class="foot"><span>30 / 35</span><span>.tmux.conf</span></div>
+</section>
+
+
+
+<section class="slide" data-section="hatch-setup">
+  <div class="eyebrow"><svg class="ic"><use href="#ic-bot"/></svg>tmux-claude-hatch</div>
+  <h2>Claude runs in a tmux popup, one keypress away, and keeps working while it's hidden</h2>
+  <div class="split code-left">
+<pre class="code sm">set -g @plugin 'craftzdog/tmux-claude-hatch'
+<span class="c"># every popup Claude starts without permission prompts</span>
+set -g @claude_args '--dangerously-skip-permissions'
+<span class="c"># wrapper: drop to a shell when Claude exits</span>
+set -g @claude_command "$HOME/.config/tmux/claude.sh"
+<span class="c"># picker enter: open the chosen Claude here</span>
+set -g @claude_fzf_options \
+  "--bind 'enter:become($HOME/.config/tmux/claude-pick.sh {})'"
+
+run '~/.tmux/plugins/tpm/tpm'
+
+<span class="c"># AFTER tpm, to override the plugin's own y</span>
+bind-key y run-shell "$HOME/.config/tmux/claude-popup.sh \
+  '#{q:session_path}' '#{q:pane_current_path}' '#{q:window_id}'"
+bind-key Y run-shell "… --resume"</pre>
+    <div class="stack">
+      <div class="keys">
+        <div><kbd>C-t</kbd> <kbd>y</kbd></div><div>Open Claude for the current directory</div>
+        <div><kbd>C-t</kbd> <kbd>Y</kbd></div><div>Same, starting with <code>--resume</code></div>
+        <div><kbd>C-t</kbd> <kbd>u</kbd></div><div>Picker: every Claude, <span class="t-warn">waiting</span> / <span class="t-ok">working</span></div>
+        <div><kbd>C-t</kbd> <kbd>d</kbd></div><div>Hide it; Claude keeps working</div>
+      </div>
+      <ul class="points tight" data-step="1">
+        <li>Each popup is a nested tmux session, so hiding it only detaches.</li>
+        <li><code>claude.sh</code> drops to a shell when Claude exits: <kbd>Ctrl</kbd><kbd>C</kbd> never kills the popup.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>31 / 35</span><span>tmux-claude-hatch · .tmux.conf</span></div>
+</section>
+
+<section class="slide" data-section="popup-layout">
+  <div class="eyebrow"><svg class="ic"><use href="#ic-panes"/></svg>claude-popup.sh</div>
+  <h2>One popup session per project, and one window in it per directory</h2>
+  <div class="chart meter" style="flex:1; min-height:0; justify-content:center;">
+    <svg viewBox="0 0 1100 330" role="img" aria-label="A LoanBud tmux session maps to one Claude popup session with a window per directory">
+      <defs><marker id="arrow-pop" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0 0 L12 6 L0 12 Z" class="sv-ink"/></marker></defs>
+      <!-- outer session -->
+      <rect x="10" y="20" width="330" height="290" rx="14" class="gl-shell"/>
+      <text x="28" y="50" class="sv-lbl">tmux session · LoanBud</text>
+      <text x="28" y="74" class="sv-tick">started in ~/…/loanbud-hq</text>
+      <rect x="30" y="96" width="290" height="58" rx="8" class="sv-box"/>
+      <text x="46" y="130" class="sv-code">pane in backend-hub/</text>
+      <rect x="30" y="170" width="290" height="58" rx="8" class="sv-box"/>
+      <text x="46" y="204" class="sv-code">pane in frontend/</text>
+      <text x="30" y="276" class="sv-tick">press  C-t y  in a pane</text>
+      <!-- popup session -->
+      <rect x="560" y="20" width="530" height="290" rx="14" class="gl-shell-hot"/>
+      <text x="580" y="50" class="sv-hot">popup session · claude-&lt;hash of loanbud-hq&gt;</text>
+      <text x="580" y="74" class="sv-tick">one per outer session, shown as "Agents · loanbud-hq"</text>
+      <g data-step="1">
+        <path d="M322 125 H 576" class="sv-hot-line" marker-end="url(#arrow-pop)"/>
+        <rect x="580" y="96" width="490" height="58" rx="8" class="sv-box-hot"/>
+        <text x="596" y="130" class="sv-code">window "backend-hub" · claude</text>
+        <text x="1056" y="130" text-anchor="end" class="sv-ok">new</text>
+      </g>
+      <g data-step="2">
+        <path d="M322 199 H 576" class="sv-hot-line" marker-end="url(#arrow-pop)"/>
+        <rect x="580" y="170" width="490" height="58" rx="8" class="sv-box-hot"/>
+        <text x="596" y="204" class="sv-code">window "frontend" · claude</text>
+        <text x="1056" y="204" text-anchor="end" class="sv-ok">new</text>
+      </g>
+      <g data-step="3">
+        <path d="M322 140 C 440 140, 460 260, 576 262" class="sv-line-soft" stroke-dasharray="6 5" marker-end="url(#arrow-pop)"/>
+        <text x="596" y="262" class="sv-lbl-sm">back in backend-hub → same window reopens,</text>
+        <text x="596" y="286" class="sv-lbl-sm">matched by its @claude_dir tag. No second Claude.</text>
+      </g>
+    </svg>
+  </div>
+  <ul class="points tight" data-step="3">
+    <li>Plugin default: one popup session <b>per directory</b>. Mine groups them <b>per tmux session</b>, so <kbd>C-t</kbd> <kbd>n</kbd>/<kbd>p</kbd> inside the popup flips between a project's Claudes.</li>
+  </ul>
+  <div class="foot"><span>32 / 35</span><span>claude-popup.sh</span></div>
+</section>
+
+
+
+<section class="slide" data-section="claude-settings">
+  <div class="eyebrow"><svg class="ic"><use href="#ic-bot"/></svg>Claude Code settings</div>
+  <h2>Claude Code knows it runs inside tmux</h2>
+  <div class="split code-left">
+<pre class="code sm"><span class="c">// ~/.claude/settings.json (excerpt, not in the repo)</span>
+{
+  "teammateMode": "tmux",
+  "env": { "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1" },
+  "tui": "fullscreen",
+  "theme": "custom:tokyo-night",
+  "effortLevel": "high",
+  "enabledPlugins": {
+    "typescript-lsp@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": true,
+    "jdtls-lsp@claude-plugins-official": true,
+    "tmux-claude-hatch@tmux-claude-hatch": true
+  },
+  "skipDangerousModePermissionPrompt": true
+}</pre>
+    <ul class="points">
+      <li><b>Agent teams in tmux</b>: when Claude starts teammates, each one opens in its own tmux pane, so you can watch them work.</li>
+      <li><b>Same theme</b> as the terminal, tmux and bat.</li>
+      <li><b>LSP plugins</b> give Claude go-to-definition and diagnostics in TS, Python and Java.</li>
+      <li data-step="1"><b><code>--dangerously-skip-permissions</code></b> (from <code>.tmux.conf</code>) lets a hidden Claude keep working. Fine on a personal laptop with every project in git; never with prod credentials in the shell.</li>
+    </ul>
+  </div>
+  <div class="foot"><span>33 / 35</span><span>~/.claude/settings.json</span></div>
+</section>
+
+
+<section class="slide" data-section="demo">
+  <div class="eyebrow"><svg class="ic"><use href="#ic-terminal"/></svg>Live demo</div>
+  <h2>Two projects, one popup each, nothing lost</h2>
+  <ol class="steps" style="grid-template-rows: repeat(3, auto); gap: 22px 40px;">
+    <li><b>Open in backend-hub</b><span><kbd>C-t</kbd> <kbd>y</kbd>, give Claude a task</span></li>
+    <li><b>Hide it</b><span><kbd>C-t</kbd> <kbd>d</kbd>, keep working in the pane</span></li>
+    <li><b>Second directory</b><span><kbd>C-t</kbd> <kbd>y</kbd> in frontend: a new window</span></li>
+    <li><b>Back to backend-hub</b><span><kbd>C-t</kbd> <kbd>y</kbd>: the same Claude, still working</span></li>
+    <li><b>Picker</b><span><kbd>C-t</kbd> <kbd>u</kbd>: which one is waiting?</span></li>
+    <li><b>Ctrl+C</b><span>the shell stays; <code>claude -c</code> continues</span></li>
+  </ol>
+  <div class="foot"><span>34 / 35</span><span class="demo-cue">switch to the terminal</span></div>
+</section>

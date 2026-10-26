@@ -1,0 +1,159 @@
+<!-- ============ 01 SHELL & DOTFILES ============ -->
+<section class="slide divider" data-section="divider-01">
+  <div class="divider-num">01</div>
+  <div class="section-tag"><i></i>SHELL &amp; DOTFILES</div>
+  <h2>Shell &amp; dotfiles</h2>
+  <p class="lead">The script zsh runs every time a terminal opens, and how to keep it, and every other config file, in git.</p>
+  <div class="foot"><span>4 / 35</span><span>shell &amp; dotfiles</span></div>
+</section>
+
+<section class="slide" data-section="what-is-zshrc">
+  <div class="eyebrow"><svg class="ic"><use href="#ic-terminal"/></svg>.zshrc</div>
+  <h2>Your terminal runs one script every time it opens</h2>
+  <div class="split">
+    <figure class="term" style="margin:0">
+      <div class="term-bar"><i></i><i></i><i></i><span>new tab → zsh reads ~/.zshrc, top to bottom</span></div>
+      <pre class="term-body"><span class="t-dim">source</span> ~/.zsh_custom/zsh-autosuggestions/…  <span class="t-dim"># plugins</span>
+<span class="t-dim">eval</span> "$(/opt/homebrew/bin/brew shellenv)"   <span class="t-dim"># Homebrew on PATH</span>
+<span class="t-dim">eval</span> "$(starship init zsh)"                 <span class="t-dim"># the prompt</span>
+<span class="t-dim">alias</span> v="nvim"                              <span class="t-dim"># shortcuts</span>
+<span class="t-dim">export</span> PATH="$HOME/.local/bin:$PATH"        <span class="t-dim"># where commands live</span>
+<span class="t-dim">eval</span> "$(fnm env --use-on-cd --shell zsh)"   <span class="t-dim"># tools hook into cd</span>
+<span data-step="1">
+<span class="t-dir">~</span>
+<span class="t-p">❯</span> <span class="t-cursor"></span></span></pre>
+    </figure>
+    <ul class="points">
+      <li><b>zsh</b> is the default shell on macOS since Catalina (10.15).</li>
+      <li>Every new tab or pane starts an interactive zsh, which runs <code>~/.zshrc</code> line by line.</li>
+      <li>Aliases, PATH, prompt, plugins, key bindings: anything that "just works" when you open a terminal comes from this file.</li>
+      <li data-step="1">Only after the last line do you get a prompt. A slow line here makes every new tab slow.</li>
+    </ul>
+  </div>
+  <div class="foot"><span>5 / 35</span><span>what .zshrc is</span></div>
+</section>
+
+
+<section class="slide" data-section="zshrc-structure">
+  <div class="eyebrow"><svg class="ic"><use href="#ic-edit"/></svg>Managing .zshrc</div>
+  <h2>Group .zshrc by tool, and comment why a line is there</h2>
+  <div class="split code-left">
+<pre class="code sm"><span class="c"># -------------------- Plugins --------------------</span>
+source ~/.zsh_custom/zsh-autosuggestions/zsh-autosuggestions.zsh
+<span class="c"># -------------------- Starship Prompt --------------------</span>
+eval "$(starship init zsh)"
+<span class="c"># -------------------- FZF --------------------</span>
+export FZF_DEFAULT_COMMAND="fd --type f --hidden --follow --exclude .git"
+<span class="c"># -------------------- Aliases --------------------</span>
+alias rz="source ~/.zshrc"
+<span class="c"># -------------------- PATH --------------------</span>
+export PATH="$HOME/.local/bin:$PATH"
+<span class="c"># -------------------- Tools Init --------------------</span>
+eval "$(zoxide init zsh)"
+<span class="c"># -------------------- Docker --------------------</span>
+<span class="hl"><span class="c"># Testcontainers ignores Docker contexts and reads DOCKER_HOST</span></span>
+export DOCKER_HOST="unix://$HOME/.colima/default/docker.sock"</pre>
+    <ul class="points">
+      <li>One block per tool. Removing a tool means deleting one block.</li>
+      <li>Order matters: a block that runs a command needs that command on PATH first, so Homebrew goes near the top.</li>
+      <li data-step="1">Comment the <b>why</b>, not the what. Six months later, "Testcontainers ignores Docker contexts" is the line you need.</li>
+      <li data-step="1"><code>cz</code> opens it inside the dotfiles repo, <code>rz</code> (<code>source ~/.zshrc</code>) applies it. <code>source</code> never removes an old alias: <code>exec zsh</code> for a clean reload.</li>
+    </ul>
+  </div>
+  <div class="foot"><span>6 / 35</span><span>structure · ~/Workplace/Karhdo/dotfiles/.zshrc</span></div>
+</section>
+
+
+<section class="slide" data-section="dotfiles-repo">
+  <div class="eyebrow"><svg class="ic"><use href="#ic-folder"/></svg>Dotfiles</div>
+  <h2>Config in $HOME has no history and no backup, so move it into a repo that mirrors $HOME</h2>
+  <div class="split even">
+    <div class="stack">
+      <div class="code-label">~/Workplace/Karhdo/dotfiles (git repo)</div>
+<pre class="code sm">dotfiles/
+├── .zshrc
+├── .tmux.conf
+├── .wezterm.lua
+├── .gitconfig  .gitconfig-spartan
+├── .config/
+│   ├── starship.toml
+│   ├── tmux/claude-popup.sh …
+│   └── lazygit/  nvim/  bat/
+├── Brewfile
+└── README.md   <span class="c"># repo-only: never linked</span></pre>
+    </div>
+    <div class="stack">
+      <div class="code-label" data-step="1">ls -la ~</div>
+<pre class="code sm" data-step="1">.zshrc       -&gt; Workplace/Karhdo/dotfiles/.zshrc
+.tmux.conf   -&gt; Workplace/Karhdo/dotfiles/.tmux.conf
+.wezterm.lua -&gt; Workplace/Karhdo/dotfiles/.wezterm.lua
+.gitconfig   -&gt; Workplace/Karhdo/dotfiles/.gitconfig
+.config      -&gt; Workplace/Karhdo/dotfiles/.config</pre>
+      <ul class="points tight" data-step="2">
+        <li>The files in <code>$HOME</code> are symlinks into the repo.</li>
+        <li>Editing <code>~/.zshrc</code> edits the repo file. <code>git commit</code> is the backup, and <code>git log</code> shows what you changed last week.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>7 / 35</span><span>dotfiles repo</span></div>
+</section>
+
+<section class="slide" data-section="stow">
+  <div class="eyebrow"><svg class="ic"><use href="#ic-link"/></svg>GNU Stow</div>
+  <h2>Stow creates the symlinks, so you never type ln -s</h2>
+  <div class="split code-left">
+<pre class="code"><span class="c"># from the repo root, link everything into $HOME</span>
+cd ~/Workplace/Karhdo/dotfiles
+stow -t ~ .
+
+<span class="c"># after adding a new top-level file</span>
+stow -R -t ~ .
+
+<span class="c"># .stow-local-ignore: stays in the repo only</span>
+README.md  CLAUDE.md  Brewfile  images  .git</pre>
+    <ul class="points">
+      <li>Stow mirrors the repo's paths: <code>dotfiles/.tmux.conf</code> becomes <code>~/.tmux.conf</code>.</li>
+      <li>It refuses to overwrite a real file. Move the old one away first.</li>
+      <li data-step="1"><b>Folding:</b> if <code>~/.config</code> doesn't exist yet, Stow links the <b>whole directory</b>. Then every app that writes to <code>~/.config</code> writes into your repo.</li>
+    </ul>
+  </div>
+  <div class="callout risk" data-step="1"><span class="chip risk">gotcha</span><span>That is how <code>gh</code> tokens and Copilot auth ended up inside my repo folder. <code>.gitignore</code> keeps them out of git (<code># Secrets — DO NOT TRACK</code>). <code>stow --no-folding</code> avoids it: only files get linked, never directories.</span></div>
+  <div class="foot"><span>8 / 35</span><span>gnu stow</span></div>
+</section>
+
+<section class="slide" data-section="brewfile">
+  <div class="eyebrow"><svg class="ic"><use href="#ic-box"/></svg>Brewfile</div>
+  <h2>One file lists every tool, and one command installs them</h2>
+  <div class="split code-left">
+<pre class="code sm"><span class="c"># --- Core CLI ---</span>
+brew "stow"        <span class="c"># symlink manager for these dotfiles</span>
+brew "tmux"        <span class="c"># terminal multiplexer</span>
+brew "starship"    <span class="c"># shell prompt</span>
+<span class="c"># --- Shell tooling (.zshrc) ---</span>
+brew "fzf"         <span class="c"># fuzzy finder</span>
+brew "fd"          <span class="c"># fast find, backs fzf</span>
+brew "zoxide"      <span class="c"># smarter cd</span>
+brew "eza"         <span class="c"># ls replacement</span>
+brew "direnv"      <span class="c"># per-directory env (GH_TOKEN)</span>
+<span class="c"># --- Containers ---</span>
+brew "colima"      <span class="c"># VM running the Docker engine</span>
+<span class="c"># --- Casks ---</span>
+cask "wezterm"
+cask "font-hack-nerd-font"</pre>
+    <div class="stack">
+      <div class="term">
+        <div class="term-bar"><i></i><i></i><i></i></div>
+        <pre class="term-body sm"><span class="t-p">❯</span> <span class="t-cmd">brew</span> bundle
+<span class="t-dim">Using stow … Installing lazydocker</span>
+<span class="t-ok">Homebrew Bundle complete!</span></pre>
+      </div>
+      <ul class="points tight">
+        <li>A comment per line says why the tool is there.</li>
+        <li>Installed something by hand? Add it here, or the next laptop won't have it.</li>
+        <li data-step="1"><b>New Mac:</b> install Homebrew, clone, <code>brew bundle</code>, <code>stow -t ~ .</code>. The README lists all ten steps.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>9 / 35</span><span>brewfile</span></div>
+</section>
+

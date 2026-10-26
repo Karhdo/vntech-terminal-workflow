@@ -1,0 +1,39 @@
+<!-- ============ THANK YOU ============ -->
+<!-- data-no-part: keeps the default hue instead of part 06's orange. The QR points at the public dotfiles repo. -->
+<section class="slide" data-section="thanks" data-no-part>
+  <div class="thanks-grid">
+    <div class="stack">
+      <div class="eyebrow"><svg class="ic"><use href="#ic-terminal"/></svg>Terminal-first</div>
+      <h1 class="display">Thank you</h1>
+      <ol class="takeaways">
+        <li><b>.zshrc + dotfiles in git + a Brewfile</b> turn a new laptop into one hour of copy-paste.</li>
+        <li><b>Let the directory decide</b>: git identity, gh token, Node version, AWS profile.</li>
+        <li><b>tmux holds the sessions</b>, Claude's included. Hide them, pick them, never lose them.</li>
+      </ol>
+      <div class="byline">
+        <div class="person"><img src="img/khanh-do.jpg" alt="Khánh Đỗ" /><div><b>Khánh Đỗ</b><span>questions welcome</span></div></div>
+      </div>
+    </div>
+    <figure class="repo-card">
+      <div class="qr" id="repo-qr"></div>
+      <a class="kahoot-link" href="https://github.com/Karhdo/dotfiles" target="_blank" rel="noopener">github.com/Karhdo/dotfiles</a>
+      <figcaption>README = the 10-step setup</figcaption>
+    </figure>
+  </div>
+  <div class="foot"><span>35 / 35</span><span>thank you · q&amp;a</span></div>
+</section>
+
+<script>
+(() => {
+  const url = 'https://github.com/Karhdo/dotfiles';
+  const qr = window.qrcode(0, 'M');
+  qr.addData(url);
+  qr.make();
+  const n = qr.getModuleCount();
+  let d = '';
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (qr.isDark(r, c)) d += `M${c} ${r}h1v1h-1z`;
+  document.getElementById('repo-qr').innerHTML =
+    `<svg viewBox="-3 -3 ${n + 6} ${n + 6}" shape-rendering="crispEdges" role="img" aria-label="QR code: ${url}">`
+    + `<rect x="-3" y="-3" width="${n + 6}" height="${n + 6}" rx="2" class="qr-bg"/><path d="${d}" class="qr-ink"/></svg>`;
+})();
+</script>
