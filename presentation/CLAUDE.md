@@ -15,6 +15,7 @@ sections/NN-*.html  slide content — one file per section, most edits happen he
 sections/99-thanks.html  closing slide: takeaways + QR to github.com/Karhdo/dotfiles (not a numbered section)
 tools/renumber.py   rewrites every footer page number ("12 / 39") in SECTIONS order
 terminal-workflow-outline.md  talk outline, in Vietnamese (source material, not rendered)
+notes/speaker-script.md   per-slide speaking script, in Vietnamese (not rendered; keep in sync with slides)
 ```
 
 ## How the page is assembled
